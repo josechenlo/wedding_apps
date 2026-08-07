@@ -37,10 +37,15 @@ Archivos:
 - [app_fotos/code.gs](app_fotos/code.gs) — backend: `doGet()` sirve el HTML y
   `uploadFile(base64Data, fileName, guestName, dateTaken)` valida y guarda el blob en Drive.
 - [app_fotos/index.html](app_fotos/index.html) — frontend autocontenido: CSS inline, cola de subida,
-  compresión en cliente, lector de EXIF y paleta "moca" (`--primary: #8c786a`).
+  compresión en cliente y lector de EXIF. **Comparte el diseño de `app_formulario`**: misma paleta
+  vino (`--wine: #8c1d24`) sobre crema, las mismas tres tipografías incrustadas y la misma portada
+  (guirnalda de luces, bola de espejos y los novios en Sacramento).
 
 Puntos a tener en cuenta al tocar esta app:
 
+- **Esta app está en gallego** (`<html lang="gl">`), a diferencia de `app_formulario`. Eso incluye los
+  mensajes de error que `uploadFile` devuelve al invitado vía `userError_()`. Lo que **no** se traduce
+  son los comentarios ni el diagnóstico de `comprobarConfiguracion()`, que solo lee quien la despliega.
 - El **ID de la carpeta de Drive se pega en la constante `FOLDER_ID`**, al principio de `code.gs`,
   **desde el editor de Apps Script**. En el repositorio esa constante va siempre **vacía**: este repo
   es público en GitHub y el proyecto de Apps Script es privado. Alternativa para no tenerlo ni en el
@@ -114,8 +119,16 @@ Puntos a tener en cuenta al tocar esta app:
 
 ## Convenciones
 
-- **Idioma**: todo el texto de cara al invitado va en **español**. Comentarios de código también en español.
+- **Idioma**: el texto de cara al invitado va en el idioma de cada app: `app_fotos` está en **gallego**
+  y `app_formulario` en **español**. Los comentarios de código y los mensajes de diagnóstico que solo
+  ve quien monta la app (`comprobarConfiguracion()`, `console.log`) van **siempre en español**,
+  aunque la app esté en gallego.
 - **Estructura**: una carpeta por utilidad, en la raíz, con nombre `app_<cosa>` (ej. `app_fotos`).
+- **Un solo aspecto para todas las apps**: paleta vino sobre crema, Sacramento / Cormorant Garamond /
+  Jost incrustadas, y la portada con guirnalda y bola de espejos. El invitado abre dos enlaces
+  distintos el mismo día y tienen que parecer de la misma boda. La referencia viva es
+  [app_formulario/index.html](app_formulario/index.html): al hacer una app nueva, se copian de ahí
+  las variables de `:root`, los `@font-face`, la cabecera y los botones (`.btn-solid`, `.btn-line`).
 - **Sin build**: nada de npm, bundlers ni transpilación. HTML/CSS/JS plano y `.gs`.
 - **Cero dependencias externas en tiempo de ejecución**: nada de CDN. Un salón con cobertura mala o
   portal cautivo dejaría la página sin maquetar justo cuando más se usa. CSS inline, e iconos como

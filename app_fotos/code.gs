@@ -38,7 +38,7 @@ var EXT_BY_TYPE = {
 // enlace directo, DEFAULT es más restrictivo.
 function doGet() {
   return HtmlService.createHtmlOutputFromFile("Index")
-    .setTitle("Álbum de nuestra boda 📸")
+    .setTitle("Álbum da nosa voda 📸")
     .addMetaTag("viewport", "width=device-width, initial-scale=1")
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
@@ -55,29 +55,29 @@ function doGet() {
 function uploadFile(base64Data, fileName, guestName, dateTaken) {
   try {
     if (!base64Data || typeof base64Data !== "string") {
-      throw userError_("No se ha recibido ninguna imagen.");
+      throw userError_("Non se recibiu ningunha imaxe.");
     }
 
     var separator = base64Data.indexOf(",");
     if (separator === -1) {
-      throw userError_("El formato de la imagen no es válido.");
+      throw userError_("O formato da imaxe non é válido.");
     }
 
     var header = base64Data.slice(0, separator).match(/^data:([^;]+);base64$/);
     if (!header) {
-      throw userError_("El formato de la imagen no es válido.");
+      throw userError_("O formato da imaxe non é válido.");
     }
 
     // El tipo llega del cliente: hay que validarlo antes de escribir en Drive.
     var contentType = header[1].toLowerCase();
     if (contentType.indexOf("image/") !== 0) {
-      throw userError_("Solo se admiten imágenes.");
+      throw userError_("Só se admiten imaxes.");
     }
 
     var payload = base64Data.slice(separator + 1);
     // base64 ocupa 4 caracteres por cada 3 bytes: estimamos sin decodificar.
     if (Math.floor((payload.length * 3) / 4) > MAX_BYTES) {
-      throw userError_("La foto pesa demasiado (máximo 15 MB).");
+      throw userError_("A foto pesa de máis (máximo 15 MB).");
     }
 
     var bytes = Utilities.base64Decode(payload);
@@ -94,7 +94,7 @@ function uploadFile(base64Data, fileName, guestName, dateTaken) {
       error:
         error && error.esDeUsuario
           ? error.message
-          : "No se ha podido guardar la foto. Inténtalo otra vez.",
+          : "Non se puido gardar a foto. Inténtao outra vez.",
     };
   }
 }
@@ -136,16 +136,14 @@ function sanitize_(text) {
 function getFolder_() {
   var id = folderId_();
   if (!id) {
-    throw userError_(
-      "El álbum todavía no está configurado. Avisad a los novios.",
-    );
+    throw userError_("O álbum aínda non está configurado. Avisade aos noivos.");
   }
   try {
     return DriveApp.getFolderById(id);
   } catch (error) {
     // Id incorrecto, carpeta en la papelera, o el propietario perdió el acceso.
     console.error("No se puede abrir la carpeta configurada: " + error);
-    throw userError_("No se puede acceder al álbum. Avisad a los novios.");
+    throw userError_("Non se pode acceder ao álbum. Avisade aos noivos.");
   }
 }
 
