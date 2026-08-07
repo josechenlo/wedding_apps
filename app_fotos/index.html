@@ -1,0 +1,829 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>Álbum de nuestra boda 📸</title>
+
+    <!--
+    Todo el CSS va inline a propósito: en un salón con cobertura mala o portal
+    cautivo, una hoja de estilos externa deja la página sin maquetar justo
+    cuando más se usa. Sin CDN no hay nada que pueda fallar.
+  -->
+    <style>
+      :root {
+        --primary: #8c786a; /* Moca suave */
+        --primary-dark: #5c4e45; /* Moca oscuro */
+        --bg: #f7f3ed; /* Blanco hueso crema */
+        --surface: #ffffff;
+        --surface-soft: #fafaf8;
+        --border: #e4dbd3;
+        --text: #333333;
+        --muted: #7d736c;
+        --ok: #3f7d5a;
+        --ok-bg: #eaf4ee;
+        --err: #a4453c;
+        --err-bg: #fbeceb;
+        --font-title:
+          "Playfair Display", "Hoefler Text", Georgia, "Times New Roman", serif;
+        --font-body:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 2rem 1rem 3rem;
+        min-height: 100vh;
+        background-color: var(--bg);
+        font-family: var(--font-body);
+        color: var(--text);
+        font-size: 16px;
+        line-height: 1.5;
+        -webkit-text-size-adjust: 100%;
+      }
+
+      .card {
+        max-width: 520px;
+        margin: 0 auto;
+        background: var(--surface);
+        padding: 2rem 1.5rem;
+        border-radius: 24px;
+        border: 1px solid rgba(140, 120, 106, 0.12);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.05);
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 1.75rem;
+      }
+      header .mark {
+        font-size: 2.25rem;
+        line-height: 1;
+      }
+      h1 {
+        font-family: var(--font-title);
+        font-weight: 700;
+        font-size: 1.65rem;
+        color: var(--primary-dark);
+        letter-spacing: -0.4px;
+        margin: 0.6rem 0 0.4rem;
+      }
+      header p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      /* Campo de nombre */
+      .field {
+        display: block;
+        margin-bottom: 1.25rem;
+      }
+      .field span {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--primary-dark);
+        margin-bottom: 0.4rem;
+      }
+      .field span em {
+        font-weight: 400;
+        font-style: normal;
+        color: var(--muted);
+      }
+      .field input {
+        width: 100%;
+        padding: 0.75rem 0.9rem;
+        font: inherit;
+        font-size: 1rem;
+        color: var(--text);
+        background: var(--surface-soft);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        transition: border-color 0.2s ease;
+      }
+      .field input:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: var(--surface);
+      }
+
+      /* Zona de carga */
+      .dropzone {
+        position: relative;
+        height: 165px;
+        border: 2px dashed #d1c7c0;
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        cursor: pointer;
+        background-color: var(--surface-soft);
+        transition:
+          border-color 0.2s ease,
+          background-color 0.2s ease;
+      }
+      .dropzone:hover,
+      .dropzone.focus {
+        border-color: var(--primary);
+        background-color: #f1eeea;
+      }
+      .dropzone .icon {
+        font-size: 2.25rem;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+      }
+      .dropzone .title {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1rem;
+      }
+      .dropzone .hint {
+        margin: 0.25rem 0 0;
+        font-size: 0.82rem;
+        color: var(--muted);
+      }
+      .dropzone input[type="file"] {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      /* Cola de fotos */
+      .queue {
+        list-style: none;
+        margin: 1.25rem 0 0;
+        padding: 0;
+      }
+      .queue li {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.6rem;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: var(--surface-soft);
+        margin-bottom: 0.5rem;
+      }
+      .queue li.done {
+        background: var(--ok-bg);
+        border-color: #cfe4d8;
+      }
+      .queue li.error {
+        background: var(--err-bg);
+        border-color: #f0d2cf;
+      }
+
+      .thumb {
+        flex: 0 0 auto;
+        width: 46px;
+        height: 46px;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #ece5df;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+      }
+      .thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .info {
+        flex: 1 1 auto;
+        min-width: 0;
+        text-align: left;
+      }
+      .info .name {
+        font-size: 0.88rem;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .info .state {
+        font-size: 0.78rem;
+        color: var(--muted);
+      }
+      li.done .state {
+        color: var(--ok);
+      }
+      li.error .state {
+        color: var(--err);
+      }
+
+      .remove {
+        flex: 0 0 auto;
+        border: none;
+        background: none;
+        color: var(--muted);
+        font-size: 1.35rem;
+        line-height: 1;
+        padding: 0.25rem 0.4rem;
+        cursor: pointer;
+        border-radius: 8px;
+      }
+      .remove:hover {
+        color: var(--err);
+        background: rgba(0, 0, 0, 0.04);
+      }
+
+      /* Botones */
+      button.action {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+        margin-top: 1.25rem;
+        padding: 1rem;
+        font-family: var(--font-body);
+        font-size: 1.08rem;
+        font-weight: 600;
+        color: #ffffff;
+        background-color: var(--primary);
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition:
+          background-color 0.2s ease,
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+      button.action:hover:not(:disabled) {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(140, 120, 106, 0.3);
+      }
+      button.action:disabled {
+        background-color: #c9c0ba;
+        cursor: default;
+      }
+      button.ghost {
+        background: none;
+        color: var(--primary-dark);
+        border: 1px solid var(--border);
+        margin-top: 0.6rem;
+      }
+      button.ghost:hover:not(:disabled) {
+        background: var(--surface-soft);
+        color: var(--primary-dark);
+        box-shadow: none;
+      }
+      [hidden] {
+        display: none !important;
+      }
+
+      /* Mensajes */
+      .status {
+        margin-top: 1rem;
+        text-align: center;
+        font-size: 0.9rem;
+      }
+      .status .box {
+        border-radius: 12px;
+        padding: 0.8rem 1rem;
+        font-weight: 500;
+      }
+      .status .box.ok {
+        background: var(--ok-bg);
+        color: var(--ok);
+      }
+      .status .box.err {
+        background: var(--err-bg);
+        color: var(--err);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <header>
+        <div class="mark">💍</div>
+        <h1>Álbum digital de la boda de Raquel y Jose</h1>
+        <p>Subid las fotos más bonitas de hoy para el recuerdo.</p>
+      </header>
+
+      <label class="field">
+        <span>Tu nombre <em>(opcional)</em></span>
+        <input
+          type="text"
+          id="guestName"
+          maxlength="40"
+          autocomplete="name"
+          placeholder="Así sabremos de quién es cada foto"
+        />
+      </label>
+
+      <div class="dropzone" id="dropzone">
+        <div class="icon">🖼️</div>
+        <p class="title">Toca para abrir tu carrete</p>
+        <p class="hint">Puedes elegir varias fotos a la vez</p>
+        <input type="file" id="photoInput" accept="image/*" multiple />
+      </div>
+
+      <ul class="queue" id="queue"></ul>
+
+      <button class="action" id="uploadBtn" disabled>
+        <span>☁️</span> Subir al álbum
+      </button>
+      <button class="action ghost" id="retryBtn" hidden>
+        Reintentar las que han fallado
+      </button>
+
+      <div class="status" id="status"></div>
+    </main>
+
+    <script>
+      var MAX_DIM = 1920; // lado mayor tras redimensionar
+      var JPEG_QUALITY = 0.85;
+      var MAX_ORIGINAL_BYTES = 12 * 1024 * 1024; // tope para subir sin comprimir
+      var DECODE_TIMEOUT_MS = 20000; // red de seguridad: nunca colgarse
+
+      var queue = [];
+      var nextId = 1;
+      var uploading = false;
+
+      var els = {
+        input: document.getElementById("photoInput"),
+        dropzone: document.getElementById("dropzone"),
+        list: document.getElementById("queue"),
+        uploadBtn: document.getElementById("uploadBtn"),
+        retryBtn: document.getElementById("retryBtn"),
+        status: document.getElementById("status"),
+        guestName: document.getElementById("guestName"),
+      };
+
+      /* ---------- Selección de fotos ---------- */
+
+      els.input.addEventListener("change", function () {
+        addFiles(els.input.files);
+        // Permite volver a elegir la misma foto si la han quitado de la cola.
+        els.input.value = "";
+      });
+      els.dropzone.addEventListener("dragover", function (e) {
+        e.preventDefault();
+        els.dropzone.classList.add("focus");
+      });
+      els.dropzone.addEventListener("dragleave", function () {
+        els.dropzone.classList.remove("focus");
+      });
+      els.dropzone.addEventListener("drop", function (e) {
+        e.preventDefault();
+        els.dropzone.classList.remove("focus");
+        addFiles(e.dataTransfer.files);
+      });
+
+      function addFiles(fileList) {
+        for (var i = 0; i < fileList.length; i++) {
+          var file = fileList[i];
+          if (file.type && file.type.indexOf("image/") !== 0) continue;
+          var item = {
+            id: nextId++,
+            file: file,
+            status: "pending",
+            state: "En espera",
+          };
+          queue.push(item);
+          buildRow(item);
+        }
+        updateControls();
+      }
+
+      /* ---------- Filas de la cola ---------- */
+
+      function buildRow(item) {
+        var li = document.createElement("li");
+
+        var thumb = document.createElement("div");
+        thumb.className = "thumb";
+        thumb.textContent = "📷";
+        // El objectURL es una referencia al archivo, no una copia en memoria:
+        // aguanta bien una selección de 20 fotos en un móvil.
+        var url = URL.createObjectURL(item.file);
+        var img = document.createElement("img");
+        img.alt = "";
+        // Un HEIC no se puede pintar en Chrome/Android: se queda el emoji.
+        img.addEventListener("load", function () {
+          thumb.textContent = "";
+          thumb.appendChild(img);
+        });
+        img.addEventListener("error", function () {
+          URL.revokeObjectURL(url);
+        });
+        img.src = url;
+        item.thumbUrl = url;
+
+        var info = document.createElement("div");
+        info.className = "info";
+        var name = document.createElement("div");
+        name.className = "name";
+        name.textContent = item.file.name || "Foto";
+        var state = document.createElement("div");
+        state.className = "state";
+        info.appendChild(name);
+        info.appendChild(state);
+
+        var remove = document.createElement("button");
+        remove.className = "remove";
+        remove.type = "button";
+        remove.innerHTML = "&times;";
+        remove.setAttribute("aria-label", "Quitar esta foto");
+        remove.addEventListener("click", function () {
+          removeItem(item);
+        });
+
+        li.appendChild(thumb);
+        li.appendChild(info);
+        li.appendChild(remove);
+        els.list.appendChild(li);
+
+        item.row = li;
+        item.stateEl = state;
+        item.removeEl = remove;
+        updateRow(item);
+      }
+
+      function updateRow(item) {
+        item.row.className = item.status;
+        item.stateEl.textContent = item.state;
+        // Durante la subida no se puede quitar nada de la cola.
+        item.removeEl.hidden =
+          item.status === "working" || item.status === "done";
+      }
+
+      function setState(item, status, state) {
+        item.status = status;
+        item.state = state;
+        updateRow(item);
+      }
+
+      function removeItem(item) {
+        if (item.status === "working") return;
+        if (item.thumbUrl) URL.revokeObjectURL(item.thumbUrl);
+        item.row.remove();
+        queue = queue.filter(function (other) {
+          return other !== item;
+        });
+        updateControls();
+      }
+
+      /* ---------- Controles y mensajes ---------- */
+
+      function countBy(status) {
+        return queue.filter(function (i) {
+          return i.status === status;
+        }).length;
+      }
+
+      function updateControls() {
+        var pending = countBy("pending");
+        var failed = countBy("error");
+
+        els.uploadBtn.disabled = uploading || pending === 0;
+        els.uploadBtn.innerHTML =
+          pending > 1
+            ? "<span>☁️</span> Subir " + pending + " fotos al álbum"
+            : "<span>☁️</span> Subir al álbum";
+
+        els.retryBtn.hidden = uploading || failed === 0;
+        els.retryBtn.textContent =
+          failed === 1
+            ? "Reintentar la foto que ha fallado"
+            : "Reintentar las " + failed + " que han fallado";
+      }
+
+      function showStatus(kind, message) {
+        els.status.innerHTML = "";
+        if (!message) return;
+        var box = document.createElement("div");
+        box.className = "box " + kind;
+        box.textContent = message;
+        els.status.appendChild(box);
+      }
+
+      /* ---------- Subida ---------- */
+
+      els.uploadBtn.addEventListener("click", processQueue);
+      els.retryBtn.addEventListener("click", function () {
+        queue.forEach(function (item) {
+          if (item.status === "error") setState(item, "pending", "En espera");
+        });
+        processQueue();
+      });
+
+      function processQueue() {
+        if (uploading) return;
+        uploading = true;
+        updateControls();
+        showStatus("", "");
+        rememberName();
+        uploadNext();
+      }
+
+      // Secuencial a propósito: Apps Script limita las ejecuciones simultáneas,
+      // y en una boda hay muchos móviles subiendo a la vez.
+      function uploadNext() {
+        var item = queue.filter(function (i) {
+          return i.status === "pending";
+        })[0];
+
+        if (!item) {
+          uploading = false;
+          updateControls();
+          summarize();
+          return;
+        }
+
+        setState(item, "working", "Optimizando…");
+
+        prepare(item)
+          .then(function (payload) {
+            setState(item, "working", "Subiendo…");
+            return send(payload);
+          })
+          .then(function (response) {
+            if (!response || !response.success) {
+              throw new Error(
+                (response && response.error) || "No se ha podido guardar.",
+              );
+            }
+            setState(
+              item,
+              "done",
+              item.uncompressed ? "✓ Subida (original)" : "✓ Subida",
+            );
+          })
+          .catch(function (error) {
+            setState(item, "error", "✗ " + (error.message || "Error al subir"));
+          })
+          .then(uploadNext);
+      }
+
+      // Comprime justo antes de subir, no al seleccionar: así solo hay una imagen
+      // decodificada en memoria por vez, aunque elijan 20 fotos.
+      function prepare(item) {
+        return readDateTaken(item.file)
+          .then(function (dateTaken) {
+            item.dateTaken = dateTaken;
+            return compress(item.file).catch(function () {
+              // El canvas no ha podido decodificarla (típico con HEIC en Android):
+              // subimos el original tal cual antes que perder la foto.
+              if (item.file.size > MAX_ORIGINAL_BYTES) {
+                throw new Error(
+                  "Foto demasiado grande para subirla sin optimizar",
+                );
+              }
+              item.uncompressed = true;
+              return readAsDataUrl(item.file);
+            });
+          })
+          .then(function (dataUrl) {
+            return {
+              data: dataUrl,
+              name: item.file.name,
+              dateTaken: item.dateTaken,
+            };
+          });
+      }
+
+      function compress(file) {
+        return new Promise(function (resolve, reject) {
+          var url = URL.createObjectURL(file);
+          var img = new Image();
+          var done = false;
+
+          // Sin esto, un decode que nunca termina deja la cola congelada.
+          var timer = setTimeout(function () {
+            finish(reject, new Error("la imagen ha tardado demasiado"));
+          }, DECODE_TIMEOUT_MS);
+
+          function finish(fn, value) {
+            if (done) return;
+            done = true;
+            clearTimeout(timer);
+            URL.revokeObjectURL(url);
+            fn(value);
+          }
+
+          img.onload = function () {
+            try {
+              var w = img.naturalWidth || img.width;
+              var h = img.naturalHeight || img.height;
+              if (!w || !h) return finish(reject, new Error("sin dimensiones"));
+
+              var scale = Math.min(1, MAX_DIM / Math.max(w, h));
+              var canvas = document.createElement("canvas");
+              canvas.width = Math.round(w * scale);
+              canvas.height = Math.round(h * scale);
+              canvas
+                .getContext("2d")
+                .drawImage(img, 0, 0, canvas.width, canvas.height);
+
+              var out = canvas.toDataURL("image/jpeg", JPEG_QUALITY);
+              // Safari en iOS devuelve un canvas en blanco si se queda sin memoria.
+              if (!out || out.length < 1000)
+                return finish(reject, new Error("canvas vacío"));
+              finish(resolve, out);
+            } catch (error) {
+              finish(reject, error);
+            }
+          };
+          img.onerror = function () {
+            finish(reject, new Error("formato no soportado"));
+          };
+          img.src = url;
+        });
+      }
+
+      function readAsDataUrl(file) {
+        return new Promise(function (resolve, reject) {
+          var reader = new FileReader();
+          reader.onload = function () {
+            resolve(reader.result);
+          };
+          reader.onerror = function () {
+            reject(new Error("No se ha podido leer el archivo"));
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function send(payload) {
+        return new Promise(function (resolve, reject) {
+          google.script.run
+            .withSuccessHandler(resolve)
+            .withFailureHandler(function () {
+              reject(new Error("Sin conexión, reinténtalo"));
+            })
+            .uploadFile(
+              payload.data,
+              payload.name,
+              currentName(),
+              payload.dateTaken,
+            );
+        });
+      }
+
+      function summarize() {
+        var done = countBy("done");
+        var failed = countBy("error");
+
+        if (failed > 0) {
+          showStatus(
+            "err",
+            done > 0
+              ? done +
+                  " subidas, " +
+                  failed +
+                  " no han podido guardarse. Prueba otra vez en unos segundos."
+              : "No se ha podido guardar. Prueba otra vez en unos segundos.",
+          );
+        } else if (done > 0) {
+          showStatus(
+            "ok",
+            "🎉 ¡" +
+              (done === 1 ? "Foto guardada" : done + " fotos guardadas") +
+              "! Gracias por compartir vuestro recuerdo. ¡Podéis subir más!",
+          );
+        }
+      }
+
+      /* ---------- Fecha de captura ---------- */
+
+      // El canvas borra el EXIF al recomprimir, así que la fecha se lee antes y
+      // viaja al servidor para ir en el nombre del archivo. Sin esto, el álbum se
+      // ordena por hora de subida y no por cuándo se hizo cada foto.
+      function readDateTaken(file) {
+        // El bloque EXIF va al principio del archivo: 128 KB sobran.
+        return file
+          .slice(0, 131072)
+          .arrayBuffer()
+          .then(function (buffer) {
+            return parseExifDate(buffer) || fromLastModified(file);
+          })
+          .catch(function () {
+            return fromLastModified(file);
+          });
+      }
+
+      function fromLastModified(file) {
+        return file.lastModified ? format(new Date(file.lastModified)) : "";
+      }
+
+      function format(date) {
+        function pad(n) {
+          return (n < 10 ? "0" : "") + n;
+        }
+        return (
+          date.getFullYear() +
+          "-" +
+          pad(date.getMonth() + 1) +
+          "-" +
+          pad(date.getDate()) +
+          "_" +
+          pad(date.getHours()) +
+          pad(date.getMinutes())
+        );
+      }
+
+      // Lector mínimo de EXIF: solo busca DateTimeOriginal (0x9003) en un JPEG.
+      function parseExifDate(buffer) {
+        try {
+          var view = new DataView(buffer);
+          if (view.getUint16(0) !== 0xffd8) return ""; // no es un JPEG
+
+          var offset = 2;
+          while (offset + 4 < view.byteLength) {
+            var marker = view.getUint16(offset);
+            if ((marker & 0xff00) !== 0xff00) return "";
+            if (marker === 0xffe1) {
+              // segmento APP1
+              if (view.getUint32(offset + 4) !== 0x45786966) return ""; // "Exif"
+              return parseTiff(view, offset + 10);
+            }
+            offset += 2 + view.getUint16(offset + 2);
+          }
+        } catch (error) {
+          // Un EXIF corrupto no debe impedir subir la foto.
+        }
+        return "";
+      }
+
+      function parseTiff(view, start) {
+        var little = view.getUint16(start) === 0x4949;
+        var ifd0 = start + view.getUint32(start + 4, little);
+
+        var exifPointer = findTag(view, ifd0, little, 0x8769);
+        if (exifPointer === null) return "";
+
+        var exifDir = start + view.getUint32(exifPointer, little);
+        var dateTag = findTag(view, exifDir, little, 0x9003);
+        if (dateTag === null) return "";
+
+        // Son 20 caracteres ASCII: no caben en la entrada y se guardan aparte.
+        var at = start + view.getUint32(dateTag, little);
+        var text = "";
+        for (var i = 0; i < 19; i++)
+          text += String.fromCharCode(view.getUint8(at + i));
+
+        // "AAAA:MM:DD HH:MM:SS" → "AAAA-MM-DD_HHMM".
+        // Algunas cámaras dejan la fecha a ceros: no es una fecha real y
+        // ordenaría esas fotos las primeras, así que se descarta.
+        var m = text.match(/^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2})/);
+        if (!m || m[1] === "0000") return "";
+        return m[1] + "-" + m[2] + "-" + m[3] + "_" + m[4] + m[5];
+      }
+
+      // Devuelve el offset del valor de una etiqueta dentro de un directorio IFD.
+      function findTag(view, dirStart, little, tag) {
+        var entries = view.getUint16(dirStart, little);
+        for (var i = 0; i < entries; i++) {
+          var entry = dirStart + 2 + i * 12;
+          if (view.getUint16(entry, little) === tag) return entry + 8;
+        }
+        return null;
+      }
+
+      /* ---------- Nombre del invitado ---------- */
+
+      function currentName() {
+        return els.guestName.value.trim();
+      }
+
+      // Safari bloquea el almacenamiento en iframes de terceros y Apps Script
+      // sirve la app dentro de uno: si falla, simplemente no se recuerda.
+      function rememberName() {
+        try {
+          window.localStorage.setItem("nombreInvitado", currentName());
+        } catch (error) {
+          /* sin persistencia */
+        }
+      }
+
+      try {
+        els.guestName.value =
+          window.localStorage.getItem("nombreInvitado") || "";
+      } catch (error) {
+        /* sin persistencia */
+      }
+    </script>
+  </body>
+</html>
